@@ -1,0 +1,7 @@
+<view class="page">
+  <view class="card">
+    <view class="title">血压伴侣</view>
+    <view class="body">记录和提醒工具，不提供诊断或用药调整建议。</view>
+    <button class="primary" bindtap="openBPEntry">记录血压</button>
+  </view>
+</view>

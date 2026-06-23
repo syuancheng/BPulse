@@ -1,0 +1,20 @@
+CREATE TABLE task_instances (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  owner_id BIGINT UNSIGNED NOT NULL,
+  care_plan_id BIGINT UNSIGNED NOT NULL,
+  task_type VARCHAR(40) NOT NULL,
+  title VARCHAR(80) NOT NULL,
+  scheduled_local_date DATE NOT NULL,
+  occurrence_key VARCHAR(32) NOT NULL,
+  scheduled_at_utc DATETIME(6) NOT NULL,
+  state VARCHAR(16) NOT NULL DEFAULT 'pending',
+  completed_at_utc DATETIME(6) NULL,
+  skipped_at_utc DATETIME(6) NULL,
+  created_at TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  updated_at TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+  UNIQUE KEY uq_task_instances_occurrence (care_plan_id, scheduled_local_date, occurrence_key),
+  INDEX idx_task_instances_owner_local_date (owner_id, scheduled_local_date),
+  INDEX idx_task_instances_owner_state_scheduled (owner_id, state, scheduled_at_utc),
+  CONSTRAINT fk_task_instances_owner FOREIGN KEY (owner_id) REFERENCES users(id),
+  CONSTRAINT fk_task_instances_care_plan FOREIGN KEY (care_plan_id) REFERENCES care_plans(id)
+) ENGINE=InnoDB;

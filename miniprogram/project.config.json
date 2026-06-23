@@ -1,0 +1,11 @@
+{
+  "description": "BP Companion Phase 0 skeleton",
+  "miniprogramRoot": "./",
+  "projectname": "bp-companion",
+  "appid": "touristappid",
+  "setting": {
+    "es6": true,
+    "minified": false,
+    "urlCheck": true
+  }
+}

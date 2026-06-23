@@ -1,0 +1,4 @@
+{
+  "desc": "Phase 0 skeleton",
+  "rules": [{"action": "disallow", "page": "*"}]
+}

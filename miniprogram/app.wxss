@@ -1,0 +1,9 @@
+page {
+  background: #f5f7f9;
+  color: #1f2933;
+  font-size: 34rpx;
+}
+
+.page {
+  padding: 48rpx 32rpx;
+}

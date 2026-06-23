@@ -1,0 +1,14 @@
+CREATE TABLE care_plans (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  owner_id BIGINT UNSIGNED NOT NULL,
+  task_type VARCHAR(40) NOT NULL,
+  title VARCHAR(80) NOT NULL,
+  recurrence VARCHAR(16) NOT NULL DEFAULT 'daily',
+  local_time CHAR(5) NOT NULL,
+  enabled BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  updated_at TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+  deleted_at TIMESTAMP(6) NULL,
+  INDEX idx_care_plans_owner_enabled (owner_id, enabled, deleted_at),
+  CONSTRAINT fk_care_plans_owner FOREIGN KEY (owner_id) REFERENCES users(id)
+) ENGINE=InnoDB;

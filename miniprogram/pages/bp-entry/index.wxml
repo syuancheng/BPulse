@@ -1,0 +1,35 @@
+<view class="page">
+  <view class="time-row">
+    <text>测量时间</text>
+    <picker mode="date" value="{{date}}" bindchange="onDateChange">
+      <text class="picker">{{date}}</text>
+    </picker>
+    <picker mode="time" value="{{time}}" bindchange="onTimeChange">
+      <text class="picker">{{time}}</text>
+    </picker>
+  </view>
+
+  <view class="card">
+    <label>高压 / 收缩压</label>
+    <input class="large-input" type="number" value="{{systolic1}}" data-field="systolic1" bindinput="onFieldInput" placeholder="132" />
+    <label>低压 / 舒张压</label>
+    <input class="large-input" type="number" value="{{diastolic1}}" data-field="diastolic1" bindinput="onFieldInput" placeholder="84" />
+    <label>心率（可选）</label>
+    <input class="large-input" type="number" value="{{pulse1}}" data-field="pulse1" bindinput="onFieldInput" placeholder="70" />
+  </view>
+
+  <view wx:if="{{showSecond}}" class="card">
+    <view class="section-title">第二次读数</view>
+    <label>高压 / 收缩压</label>
+    <input class="large-input" type="number" value="{{systolic2}}" data-field="systolic2" bindinput="onFieldInput" />
+    <label>低压 / 舒张压</label>
+    <input class="large-input" type="number" value="{{diastolic2}}" data-field="diastolic2" bindinput="onFieldInput" />
+    <label>心率（可选）</label>
+    <input class="large-input" type="number" value="{{pulse2}}" data-field="pulse2" bindinput="onFieldInput" />
+  </view>
+
+  <textarea class="note" value="{{note}}" data-field="note" bindinput="onFieldInput" placeholder="备注（可选）" />
+  <button class="secondary" wx:if="{{!showSecond}}" bindtap="addSecondReading">+ 再记录一次</button>
+  <view class="error" wx:if="{{error}}">{{error}}</view>
+  <button class="primary" loading="{{status === 'saving'}}" bindtap="save">确认保存</button>
+</view>

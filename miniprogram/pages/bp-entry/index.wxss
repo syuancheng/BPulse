@@ -1,0 +1,67 @@
+.page {
+  padding: 28rpx;
+}
+
+.time-row {
+  align-items: center;
+  background: #ffffff;
+  border-radius: 20rpx;
+  display: flex;
+  gap: 20rpx;
+  margin-bottom: 24rpx;
+  padding: 24rpx;
+}
+
+.picker {
+  color: #1677ff;
+  font-size: 32rpx;
+}
+
+.card {
+  background: #ffffff;
+  border-radius: 24rpx;
+  margin-bottom: 24rpx;
+  padding: 28rpx;
+}
+
+label,
+.section-title {
+  color: #1f2d3d;
+  display: block;
+  font-size: 30rpx;
+  margin: 18rpx 0 10rpx;
+}
+
+.large-input {
+  background: #f5f7f9;
+  border-radius: 16rpx;
+  font-size: 44rpx;
+  height: 88rpx;
+  padding: 0 20rpx;
+}
+
+.note {
+  background: #ffffff;
+  border-radius: 20rpx;
+  box-sizing: border-box;
+  height: 140rpx;
+  margin-bottom: 24rpx;
+  padding: 20rpx;
+  width: 100%;
+}
+
+.primary {
+  background: #1677ff;
+  color: #ffffff;
+  font-size: 34rpx;
+}
+
+.secondary {
+  margin-bottom: 20rpx;
+}
+
+.error {
+  color: #b42318;
+  font-size: 28rpx;
+  margin-bottom: 20rpx;
+}

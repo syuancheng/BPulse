@@ -1,0 +1,28 @@
+.page {
+  padding: 32rpx;
+}
+
+.card {
+  background: #ffffff;
+  border-radius: 24rpx;
+  padding: 32rpx;
+}
+
+.title {
+  font-size: 44rpx;
+  font-weight: 700;
+  margin-bottom: 16rpx;
+}
+
+.body {
+  color: #5f6b7a;
+  font-size: 30rpx;
+  line-height: 1.5;
+  margin-bottom: 32rpx;
+}
+
+.primary {
+  background: #1677ff;
+  color: #ffffff;
+  font-size: 34rpx;
+}

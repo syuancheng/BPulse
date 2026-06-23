@@ -1,0 +1,473 @@
+openapi: 3.0.3
+info:
+  title: BP Companion API
+  version: 0.1.0-draft
+  description: >-
+    MVP contract. Through Phase 3 the service implements identity, care plans,
+    daily tasks, and encrypted blood-pressure record APIs. The service records
+    and reminds; it does not diagnose or recommend treatment.
+servers:
+  - url: /
+paths:
+  /healthz:
+    get:
+      operationId: healthz
+      security: []
+      responses:
+        "200":
+          description: Process is healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+  /readyz:
+    get:
+      operationId: readyz
+      responses:
+        "200": {description: Dependencies are ready}
+  /api/v1/me:
+    get:
+      operationId: getMe
+      responses:
+        "200":
+          description: Current user profile, created idempotently when first requested
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/UserProfile"}
+        "401": {$ref: "#/components/responses/Unauthenticated"}
+        "500": {$ref: "#/components/responses/InternalError"}
+  /api/v1/me/preferences:
+    patch:
+      operationId: updatePreferences
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: "#/components/schemas/PreferencesPatch"}
+      responses:
+        "200":
+          description: Updated current user profile
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/UserProfile"}
+        "400": {$ref: "#/components/responses/InvalidArgument"}
+        "401": {$ref: "#/components/responses/Unauthenticated"}
+        "500": {$ref: "#/components/responses/InternalError"}
+  /api/v1/care-plans:
+    get:
+      operationId: listCarePlans
+      responses:
+        "200":
+          description: Owner-scoped care plans
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/CarePlanList"}
+        "401": {$ref: "#/components/responses/Unauthenticated"}
+    post:
+      operationId: createCarePlan
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: "#/components/schemas/CarePlanCreate"}
+      responses:
+        "201":
+          description: Created care plan
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/CarePlan"}
+        "400": {$ref: "#/components/responses/InvalidArgument"}
+        "401": {$ref: "#/components/responses/Unauthenticated"}
+  /api/v1/care-plans/{id}:
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
+    patch:
+      operationId: updateCarePlan
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: "#/components/schemas/CarePlanPatch"}
+      responses:
+        "200":
+          description: Updated care plan
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/CarePlan"}
+        "400": {$ref: "#/components/responses/InvalidArgument"}
+        "401": {$ref: "#/components/responses/Unauthenticated"}
+        "404": {$ref: "#/components/responses/NotFound"}
+    delete:
+      operationId: deleteCarePlan
+      responses:
+        "204": {description: Deleted care plan}
+        "401": {$ref: "#/components/responses/Unauthenticated"}
+        "404": {$ref: "#/components/responses/NotFound"}
+  /api/v1/tasks/today:
+    get:
+      operationId: listTodayTasks
+      responses:
+        "200":
+          description: Current user's local-day tasks, generated idempotently
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/TaskList"}
+        "401": {$ref: "#/components/responses/Unauthenticated"}
+  /api/v1/tasks/{id}/complete:
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
+    post:
+      operationId: completeTask
+      responses:
+        "200":
+          description: Completed task
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/TaskInstance"}
+        "401": {$ref: "#/components/responses/Unauthenticated"}
+        "404": {$ref: "#/components/responses/NotFound"}
+  /api/v1/tasks/{id}/skip:
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
+    post:
+      operationId: skipTask
+      responses:
+        "200":
+          description: Skipped task
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/TaskInstance"}
+        "401": {$ref: "#/components/responses/Unauthenticated"}
+        "404": {$ref: "#/components/responses/NotFound"}
+  /api/v1/bp-entry/interpret:
+    post:
+      operationId: interpretBloodPressureText
+      description: Returns untrusted editable candidates and never persists a record.
+      responses:
+        "200": {description: Candidate draft with needsConfirmation true}
+  /api/v1/bp-records:
+    get:
+      operationId: listBloodPressureRecords
+      responses:
+        "200": {description: Bounded owner-scoped records}
+    post:
+      operationId: createBloodPressureRecord
+      description: The only final record persistence path; requires clientRequestId.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: "#/components/schemas/BPRecordCreate"}
+      responses:
+        "201":
+          description: Encrypted record stored, or existing idempotent record returned
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/BPRecord"}
+        "400": {$ref: "#/components/responses/InvalidArgument"}
+        "409": {$ref: "#/components/responses/Conflict"}
+  /api/v1/bp-records/{id}:
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
+    get:
+      operationId: getBloodPressureRecord
+      responses:
+        "200":
+          description: Owner-authorized record
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/BPRecord"}
+        "404": {$ref: "#/components/responses/NotFound"}
+  /api/v1/bp-trends:
+    get:
+      operationId: getBloodPressureTrends
+      responses:
+        "200":
+          description: Bounded owner-scoped trend
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/BPTrendList"}
+  /api/v1/caregiver-invitations:
+    post:
+      operationId: createCaregiverInvitation
+      responses:
+        "201": {description: Short-lived invitation created}
+  /api/v1/caregiver-bindings:
+    get:
+      operationId: listCaregiverBindings
+      responses:
+        "200": {description: Authorized bindings}
+  /api/v1/caregiver-bindings/accept:
+    post:
+      operationId: acceptCaregiverBinding
+      responses:
+        "200": {description: Invitation accepted}
+  /api/v1/caregiver-bindings/{id}/permissions:
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
+    patch:
+      operationId: updateCaregiverPermissions
+      responses:
+        "200": {description: Permissions updated}
+  /api/v1/caregiver-bindings/{id}:
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
+    delete:
+      operationId: revokeCaregiverBinding
+      responses:
+        "204": {description: Binding revoked immediately}
+  /api/v1/caregiver/patients/{patientId}/summary:
+    parameters:
+      - name: patientId
+        in: path
+        required: true
+        schema: {type: string}
+    get:
+      operationId: getCaregiverPatientSummary
+      responses:
+        "200": {description: Permission-filtered summary}
+  /api/v1/subscription-grants:
+    post:
+      operationId: recordSubscriptionGrant
+      responses:
+        "200": {description: Idempotent grant estimate recorded}
+  /api/v1/privacy/export:
+    get:
+      operationId: exportMyData
+      responses:
+        "200": {description: Ownership-checked export}
+  /api/v1/privacy/deletion-requests:
+    post:
+      operationId: requestAccountDeletion
+      responses:
+        "202": {description: Confirmed deletion request accepted}
+components:
+  securitySchemes:
+    CloudBaseIdentity:
+      type: apiKey
+      in: header
+      name: X-WX-OPENID
+      description: >-
+        Trusted platform-injected identity in test/production; never accepted
+        from request body, path, or query. Local mode uses X-Debug-OpenID only.
+  parameters:
+    ResourceId:
+      name: id
+      in: path
+      required: true
+      schema: {type: string}
+  schemas:
+    HealthResponse:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [ok]
+    UserProfile:
+      type: object
+      required: [id, timezone, accessibility, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+          description: Internal opaque ID represented as a string for JavaScript safety.
+        timezone:
+          type: string
+          maxLength: 64
+          example: Asia/Singapore
+        accessibility:
+          $ref: "#/components/schemas/AccessibilityPreferences"
+        createdAt: {type: string, format: date-time}
+        updatedAt: {type: string, format: date-time}
+    AccessibilityPreferences:
+      type: object
+      required: [largeText, highContrast]
+      properties:
+        largeText: {type: boolean}
+        highContrast: {type: boolean}
+    PreferencesPatch:
+      type: object
+      additionalProperties: false
+      properties:
+        timezone:
+          type: string
+          maxLength: 64
+          description: Valid IANA timezone name.
+        accessibility:
+          type: object
+          additionalProperties: false
+          properties:
+            largeText: {type: boolean}
+            highContrast: {type: boolean}
+      minProperties: 1
+    CarePlanCreate:
+      type: object
+      additionalProperties: false
+      required: [taskType, title, localTime]
+      properties:
+        taskType:
+          type: string
+          enum: [blood_pressure, exercise, diet, medication_reminder_optional]
+        title:
+          type: string
+          maxLength: 80
+        localTime:
+          type: string
+          pattern: "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+        enabled:
+          type: boolean
+    CarePlanPatch:
+      type: object
+      additionalProperties: false
+      minProperties: 1
+      properties:
+        title:
+          type: string
+          maxLength: 80
+        localTime:
+          type: string
+          pattern: "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+        enabled:
+          type: boolean
+    CarePlan:
+      type: object
+      required: [id, taskType, title, recurrence, localTime, enabled, createdAt, updatedAt]
+      properties:
+        id: {type: string}
+        taskType: {type: string}
+        title: {type: string}
+        recurrence: {type: string, enum: [daily]}
+        localTime: {type: string}
+        enabled: {type: boolean}
+        createdAt: {type: string, format: date-time}
+        updatedAt: {type: string, format: date-time}
+    CarePlanList:
+      type: object
+      required: [carePlans]
+      properties:
+        carePlans:
+          type: array
+          items: {$ref: "#/components/schemas/CarePlan"}
+    TaskInstance:
+      type: object
+      required: [id, carePlanId, taskType, title, scheduledLocalDate, scheduledAt, state]
+      properties:
+        id: {type: string}
+        carePlanId: {type: string}
+        taskType: {type: string}
+        title: {type: string}
+        scheduledLocalDate: {type: string, format: date}
+        scheduledAt: {type: string, format: date-time, description: UTC timestamp}
+        state: {type: string, enum: [pending, completed, skipped]}
+        completedAt: {type: string, format: date-time}
+        skippedAt: {type: string, format: date-time}
+    TaskList:
+      type: object
+      required: [tasks]
+      properties:
+        tasks:
+          type: array
+          items: {$ref: "#/components/schemas/TaskInstance"}
+    BPReading:
+      type: object
+      additionalProperties: false
+      required: [systolic, diastolic]
+      properties:
+        systolic: {type: integer, minimum: 40, maximum: 260}
+        diastolic: {type: integer, minimum: 30, maximum: 180}
+        pulse: {type: integer, minimum: 30, maximum: 220}
+    BPRecordCreate:
+      type: object
+      additionalProperties: false
+      required: [clientRequestId, measuredAt, timezone, entryMethod, readings]
+      properties:
+        clientRequestId: {type: string, minLength: 8, maxLength: 80}
+        measuredAt:
+          type: string
+          format: date-time
+          description: RFC3339 timestamp with explicit offset; stored as UTC.
+        timezone: {type: string, description: Valid IANA timezone}
+        entryMethod: {type: string, enum: [manual, voice, photo]}
+        readings:
+          type: array
+          minItems: 1
+          maxItems: 2
+          items: {$ref: "#/components/schemas/BPReading"}
+        note: {type: string, maxLength: 200}
+        timeConfirmed:
+          type: boolean
+          description: Required true for future or unusually old measurement times.
+    BPSummary:
+      type: object
+      required: [averageSystolic, averageDiastolic, readingCount]
+      properties:
+        averageSystolic: {type: integer}
+        averageDiastolic: {type: integer}
+        averagePulse: {type: integer}
+        readingCount: {type: integer}
+    BPRecord:
+      type: object
+      required: [id, clientRequestId, measuredAt, timezone, entryMethod, readings, summary, createdAt]
+      properties:
+        id: {type: string}
+        clientRequestId: {type: string}
+        measuredAt: {type: string, format: date-time, description: UTC timestamp}
+        timezone: {type: string}
+        entryMethod: {type: string, enum: [manual, voice, photo]}
+        readings:
+          type: array
+          items: {$ref: "#/components/schemas/BPReading"}
+        summary: {$ref: "#/components/schemas/BPSummary"}
+        note: {type: string}
+        createdAt: {type: string, format: date-time}
+    BPTrendList:
+      type: object
+      required: [points]
+      properties:
+        points:
+          type: array
+          items:
+            type: object
+            required: [localDate, averageSystolic, averageDiastolic, recordCount]
+            properties:
+              localDate: {type: string, format: date}
+              averageSystolic: {type: integer}
+              averageDiastolic: {type: integer}
+              averagePulse: {type: integer}
+              recordCount: {type: integer}
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          enum: [INVALID_ARGUMENT, UNAUTHENTICATED, FORBIDDEN, NOT_FOUND, CONFLICT, INTERNAL]
+        message: {type: string}
+  responses:
+    InvalidArgument:
+      description: Strict request validation failed
+      content:
+        application/json:
+          schema: {$ref: "#/components/schemas/Error"}
+    Unauthenticated:
+      description: Missing or untrusted identity
+      content:
+        application/json:
+          schema: {$ref: "#/components/schemas/Error"}
+    NotFound:
+      description: Resource does not exist or is not owned by the current user
+      content:
+        application/json:
+          schema: {$ref: "#/components/schemas/Error"}
+    Conflict:
+      description: Idempotency key was reused with different data
+      content:
+        application/json:
+          schema: {$ref: "#/components/schemas/Error"}
+    InternalError:
+      description: Internal failure without sensitive details
+      content:
+        application/json:
+          schema: {$ref: "#/components/schemas/Error"}
+security:
+  - CloudBaseIdentity: []
