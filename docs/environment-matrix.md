@@ -16,11 +16,15 @@
 | `NOTIFIER_MODE` | `fake` | `fake` until manual validation | explicit `real` | No |
 | `MEDIA_PROVIDER_MODE` | `fake` | `fake` in ordinary CI/E2E | explicit `real` | No |
 | `OCR_REGION` / `ASR_REGION` | unset | configured if manually tested | configured | No |
+| `TENCENT_ASR_ENDPOINT` / `TENCENT_OCR_ENDPOINT` | unset | configured only for disabled-by-default contract tests | configured for real provider adapter | No |
+| `TENCENT_PROVIDER_AUTH_TOKEN` | unset | secret-store value | secret-store value | Yes |
 | `LOG_LEVEL` | `debug`/`info` | `info` | `info` | No |
 
 ASR/OCR provider credentials are function-side workload identity or secret-store
-values and are deliberately absent from `.env.example`. Test and production must
-not share databases, encryption keys, logs, services, or workers.
+values and are deliberately absent from `.env.example`. The ordinary local/CI
+media-parser path uses `fake`; real Tencent provider adapter contract tests are
+disabled-by-default and require operator-provided endpoints and secrets. Test and
+production must not share databases, encryption keys, logs, services, or workers.
 
 Identity header policy is environment-bound and not configurable by clients:
 

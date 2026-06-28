@@ -23,6 +23,7 @@ func NewRouter(dependencies Dependencies) http.Handler {
 	carePlans := carePlanHandler{users: dependencies.Users, carePlans: dependencies.CarePlans}
 	tasks := taskHandler{users: dependencies.Users, tasks: dependencies.Tasks}
 	bpRecords := bpRecordHandler{users: dependencies.Users, bpRecords: dependencies.BPRecords}
+	bpEntries := bpEntryHandler{users: dependencies.Users}
 	mux.Handle("/api/v1/me", protected(http.HandlerFunc(me.get)))
 	mux.Handle("/api/v1/me/preferences", protected(http.HandlerFunc(me.patchPreferences)))
 	mux.Handle("/api/v1/care-plans", protected(http.HandlerFunc(carePlans.collection)))
@@ -32,6 +33,7 @@ func NewRouter(dependencies Dependencies) http.Handler {
 	mux.Handle("/api/v1/bp-records", protected(http.HandlerFunc(bpRecords.collection)))
 	mux.Handle("/api/v1/bp-records/", protected(http.HandlerFunc(bpRecords.item)))
 	mux.Handle("/api/v1/bp-trends", protected(http.HandlerFunc(bpRecords.trends)))
+	mux.Handle("/api/v1/bp-entry/interpret", protected(http.HandlerFunc(bpEntries.interpret)))
 	return mux
 }
 

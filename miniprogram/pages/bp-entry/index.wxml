@@ -18,6 +18,15 @@
     <input class="large-input" type="number" value="{{pulse1}}" data-field="pulse1" bindinput="onFieldInput" placeholder="70" />
   </view>
 
+  <view class="assist card">
+    <view class="section-title">辅助录入（不会自动保存）</view>
+    <view class="hint">语音和照片只用于本次识别，结果会填入上方草稿，请确认后点击保存。</view>
+    <button class="secondary" wx:if="{{!recording}}" bindtap="startVoice">🎙 说出读数</button>
+    <button class="secondary danger" wx:if="{{recording}}" bindtap="stopVoice">停止录音</button>
+    <button class="secondary" bindtap="choosePhoto">📷 拍血压计</button>
+    <view class="hint" wx:if="{{assistMessage}}">{{assistMessage}}</view>
+  </view>
+
   <view wx:if="{{showSecond}}" class="card">
     <view class="section-title">第二次读数</view>
     <label>高压 / 收缩压</label>

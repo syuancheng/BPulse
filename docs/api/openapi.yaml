@@ -3,9 +3,10 @@ info:
   title: BP Companion API
   version: 0.1.0-draft
   description: >-
-    MVP contract. Through Phase 3 the service implements identity, care plans,
-    daily tasks, and encrypted blood-pressure record APIs. The service records
-    and reminds; it does not diagnose or recommend treatment.
+    MVP contract. Through Phase 4 the service implements identity, care plans,
+    daily tasks, encrypted blood-pressure record APIs, and deterministic
+    assisted-entry interpretation. The service records and reminds; it does not
+    diagnose or recommend treatment.
 servers:
   - url: /
 paths:
@@ -143,8 +144,26 @@ paths:
     post:
       operationId: interpretBloodPressureText
       description: Returns untrusted editable candidates and never persists a record.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [recognizedText]
+              properties:
+                recognizedText:
+                  type: string
+                  maxLength: 500
       responses:
-        "200": {description: Candidate draft with needsConfirmation true}
+        "200":
+          description: Candidate draft with needsConfirmation true
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/BPEntryInterpretation"}
+        "400": {$ref: "#/components/responses/InvalidArgument"}
+        "401": {$ref: "#/components/responses/Unauthenticated"}
   /api/v1/bp-records:
     get:
       operationId: listBloodPressureRecords
@@ -397,6 +416,30 @@ components:
         timeConfirmed:
           type: boolean
           description: Required true for future or unusually old measurement times.
+    BPEntryFieldCandidate:
+      type: object
+      required: [value, confidence, reason]
+      properties:
+        value:
+          type: integer
+          nullable: true
+          description: Null means missing, conflicting, low-confidence, or out-of-bounds.
+        confidence: {type: number}
+        reason: {type: string}
+    BPEntryInterpretation:
+      type: object
+      required: [candidate, needsConfirmation]
+      properties:
+        needsConfirmation:
+          type: boolean
+          enum: [true]
+        candidate:
+          type: object
+          required: [systolic, diastolic, pulse]
+          properties:
+            systolic: {$ref: "#/components/schemas/BPEntryFieldCandidate"}
+            diastolic: {$ref: "#/components/schemas/BPEntryFieldCandidate"}
+            pulse: {$ref: "#/components/schemas/BPEntryFieldCandidate"}
     BPSummary:
       type: object
       required: [averageSystolic, averageDiastolic, readingCount]

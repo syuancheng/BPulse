@@ -142,6 +142,45 @@ func TestBPRecordValidationAndCorruptedCiphertext(t *testing.T) {
 	getBPRecord(t, router, "synthetic-patient-a", created.ID, http.StatusInternalServerError)
 }
 
+func TestBPEntryInterpretRequiresAuthAndDoesNotPersist(t *testing.T) {
+	db := openDatabase(t)
+	clearCareTaskTables(t, db)
+	router := newBPRecordRouter(t, db, fixedClock{now: time.Date(2026, 6, 23, 11, 0, 0, 0, time.UTC)})
+
+	recorder := httptest.NewRecorder()
+	router.ServeHTTP(recorder, newJSONRequest(http.MethodPost, "/api/v1/bp-entry/interpret", "synthetic-patient-a", `{"recognizedText":"高压一百三十二，低压84，心率七十"}`))
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("interpret status = %d, body=%s", recorder.Code, recorder.Body.String())
+	}
+	var payload struct {
+		Candidate struct {
+			Systolic  struct{ Value *int } `json:"systolic"`
+			Diastolic struct{ Value *int } `json:"diastolic"`
+			Pulse     struct{ Value *int } `json:"pulse"`
+		} `json:"candidate"`
+		NeedsConfirmation bool `json:"needsConfirmation"`
+	}
+	if err := json.NewDecoder(recorder.Body).Decode(&payload); err != nil {
+		t.Fatalf("decode interpret: %v", err)
+	}
+	if !payload.NeedsConfirmation || *payload.Candidate.Systolic.Value != 132 || *payload.Candidate.Diastolic.Value != 84 || *payload.Candidate.Pulse.Value != 70 {
+		t.Fatalf("interpret payload = %#v", payload)
+	}
+	var count int
+	if err := db.QueryRowContext(context.Background(), "SELECT COUNT(*) FROM bp_records").Scan(&count); err != nil {
+		t.Fatalf("count bp records: %v", err)
+	}
+	if count != 0 {
+		t.Fatalf("interpret persisted bp records: %d", count)
+	}
+
+	unauthenticated := httptest.NewRecorder()
+	router.ServeHTTP(unauthenticated, httptest.NewRequest(http.MethodPost, "/api/v1/bp-entry/interpret", nil))
+	if unauthenticated.Code != http.StatusUnauthorized {
+		t.Fatalf("unauthenticated interpret status = %d, want 401", unauthenticated.Code)
+	}
+}
+
 func newBPRecordRouter(t *testing.T, db *sql.DB, clock bprecord.Clock) http.Handler {
 	t.Helper()
 	keyring, err := bprecord.NewKeyringFromBase64("test-v1", "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=")

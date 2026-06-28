@@ -1,5 +1,10 @@
+const config = require("./config/index");
+
 App({
   onLaunch() {
-    // CloudBase is initialized in a later environment-specific integration step.
+    const environment = config.getActiveEnvironment();
+    if (wx.cloud && environment.cloudbaseEnvId) {
+      wx.cloud.init({env: environment.cloudbaseEnvId});
+    }
   },
 });

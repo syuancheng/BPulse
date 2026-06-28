@@ -14,7 +14,6 @@
 └── Makefile               Stable developer and CI command surface
 ```
 
-Phase 3 adds `server/internal/bprecord`, the manual Mini Program entry page at
-`miniprogram/pages/bp-entry`, and migration `000005_bp_records`. Media
-recognition, caregiver, and reminder business implementation remain out of
-scope.
+Phase 4 adds `server/internal/bpentry`, `POST /api/v1/bp-entry/interpret`, and
+the media-parser fake provider/parser. Caregiver and reminder business
+implementation remain out of scope.

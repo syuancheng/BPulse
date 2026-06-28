@@ -2,7 +2,7 @@
   "name": "bp-media-parser",
   "version": "0.1.0",
   "private": true,
-  "description": "Phase 0 CloudBase media-parser skeleton",
+  "description": "CloudBase media-parser for assisted blood-pressure entry",
   "main": "src/index.js",
   "scripts": {
     "lint": "node --check src/index.js && node --check test/index.test.js",

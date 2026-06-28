@@ -23,6 +23,9 @@ function createApiClient({cloudbaseEnvId, serviceName}) {
     createBPRecord(data) {
       return this.call({path: "/api/v1/bp-records", method: "POST", data});
     },
+    interpretBPEntry(data) {
+      return this.call({path: "/api/v1/bp-entry/interpret", method: "POST", data});
+    },
   };
 }
 

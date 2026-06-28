@@ -60,6 +60,21 @@ label,
   margin-bottom: 20rpx;
 }
 
+.assist .secondary {
+  font-size: 32rpx;
+}
+
+.danger {
+  color: #b42318;
+}
+
+.hint {
+  color: #5f6b7a;
+  font-size: 28rpx;
+  line-height: 1.5;
+  margin-bottom: 16rpx;
+}
+
 .error {
   color: #b42318;
   font-size: 28rpx;

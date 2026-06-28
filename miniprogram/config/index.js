@@ -1,7 +1,15 @@
 const environments = Object.freeze({
-  local: Object.freeze({cloudbaseEnvId: "", serviceName: ""}),
-  test: Object.freeze({cloudbaseEnvId: "CONFIGURE_IN_PRIVATE_BUILD", serviceName: "bp-api-test"}),
-  production: Object.freeze({cloudbaseEnvId: "CONFIGURE_IN_PRIVATE_BUILD", serviceName: "bp-api-prod"}),
+  local: Object.freeze({cloudbaseEnvId: "", serviceName: "", mediaParserFunctionName: "media-parser"}),
+  test: Object.freeze({
+    cloudbaseEnvId: "CONFIGURE_IN_PRIVATE_BUILD",
+    serviceName: "bp-api-test",
+    mediaParserFunctionName: "media-parser",
+  }),
+  production: Object.freeze({
+    cloudbaseEnvId: "CONFIGURE_IN_PRIVATE_BUILD",
+    serviceName: "bp-api-prod",
+    mediaParserFunctionName: "media-parser",
+  }),
 });
 
 function getEnvironment(name) {

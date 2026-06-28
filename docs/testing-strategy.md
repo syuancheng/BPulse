@@ -42,11 +42,20 @@ CloudBase, Tencent ASR, or Tencent OCR.
 - list, get, and trend APIs are owner-scoped; cross-user attempts return empty/not found;
 - integration tests assert ciphertext does not contain synthetic plaintext health payload text.
 
+## Phase 4 assisted-entry coverage
+
+- voice phrases cover Chinese and Arabic numerals plus systolic/diastolic/pulse synonyms;
+- OCR fixtures cover label/coordinate association, extra digits, missing labels, and conflicts;
+- low-confidence, missing, and conflicting fields remain blank and require user confirmation;
+- Mini Program permission denial, cancellation, provider failure, and cleanup failure preserve manual editing;
+- media-parser validates type/size/duration, rate-limits per user, and deletes temporary media in success and failure paths;
+- `POST /api/v1/bp-entry/interpret` returns candidates only and integration tests prove it does not create records.
+
 ## Later required coverage
 
-Later phases add parser ambiguity, media cleanup, caregiver permission, privacy,
-and overlapping worker tests. Release requires real-device testing with two
-synthetic accounts. Recognition output must be proven unable to auto-save.
+Later phases add caregiver permission, privacy/export/deletion, and overlapping
+worker tests. Release requires real-device testing with two synthetic accounts.
+Recognition output must be proven unable to auto-save on device as well as in CI.
 
 ## Migration execution policy
 
